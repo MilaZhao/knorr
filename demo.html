@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>康寶廚藝時代 Knorr Pro v8</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
+    <style>
+        /* --- 1. Design Tokens --- */
+        :root {
+            /* Colors */
+            --primary: #00652B;
+            --primary-light: #E6F0EA;
+            --secondary: #FF5700;
+            --secondary-light: #FFF0E5;
+            --bg-body: #F7F9F8;
+            --surface: #FFFFFF;
+            
+            /* Typography */
+            --text-main: #2D3330;
+            --text-body: #4A524F;
+            --text-muted: #8C9692;
+            
+            /* Spacing */
+            --sp-xs: 4px; --sp-sm: 8px; --sp-md: 16px; --sp-lg: 24px; --sp-xl: 32px;
+            
+            /* Elevation */
+            --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.04);
+            --shadow-md: 0 8px 24px rgba(0, 101, 43, 0.08);
+            
+            /* Layout */
+            --bottom-nav-height: 80px;
+            --radius-md: 12px;
+            --radius-lg: 20px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { 
+            background-color: var(--bg-body); color: var(--text-main); 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            padding-bottom: var(--bottom-nav-height); line-height: 1.6;
+        }
+
+        /* --- 2. Header & Tabs --- */
+        header { background-color: var(--surface); position: sticky; top: 0; z-index: 100; box-shadow: var(--shadow-sm); }
+        .header-top { background-color: var(--primary); color: var(--surface); padding: var(--sp-sm) var(--sp-md); height: 56px; display: flex; align-items: center; gap: var(--sp-md); }
+        .search-bar { flex: 1; background: rgba(255,255,255,0.15); border-radius: 30px; height: 36px; display: flex; align-items: center; padding: 0 var(--sp-md); color: white; font-size: 14px; gap: 8px; }
+        .tab-bar { padding: var(--sp-md) 0; background: var(--surface); }
+        .scrolling-wrapper { display: flex; overflow-x: auto; gap: 12px; padding: 0 var(--sp-md); scrollbar-width: none; }
+        .scrolling-wrapper::-webkit-scrollbar { display: none; }
+        .tab-chip { padding: 8px 16px; border-radius: 24px; font-size: 14px; font-weight: 500; color: var(--text-muted); background: #F0F2F1; white-space: nowrap; transition: 0.3s; cursor: pointer; border: 1px solid transparent; }
+        .tab-chip.active { background: var(--primary-light); color: var(--primary); font-weight: 600; border-color: rgba(0, 101, 43, 0.2); }
+
+        /* --- 3. Cards & Lists --- */
+        .section-title { padding: var(--sp-lg) var(--sp-md) var(--sp-md); font-size: 18px; font-weight: 700; display: flex; justify-content: space-between; align-items: baseline; }
+        .card-scroll-container { display: flex; overflow-x: auto; gap: var(--sp-md); padding: 0 var(--sp-md) var(--sp-lg); }
+        .grid-container { display: grid; grid-template-columns: 1fr 1fr; gap: var(--sp-md); padding: 0 var(--sp-md) var(--sp-lg); }
+        
+        .card { background: var(--surface); border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow-sm); transition: transform 0.2s; position: relative; }
+        .card:active { transform: scale(0.98); }
+        .card-img-wrapper { position: relative; padding-top: 65%; background: #eee; }
+        .card-img { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; }
+        .card-badge { position: absolute; top: 12px; left: 12px; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); color: white; font-size: 10px; font-weight: bold; padding: 4px 8px; border-radius: 4px; }
+        .card-content { padding: 16px; }
+        .card-title { font-size: 15px; font-weight: 700; margin-bottom: 8px; line-height: 1.4; }
+        .card-meta { display: flex; gap: 8px; }
+        .meta-tag { font-size: 11px; color: var(--text-body); background: #F0F2F1; padding: 4px 8px; border-radius: 6px; display: flex; align-items: center; gap: 4px; }
+
+        .list-card { background: var(--surface); margin: 0 var(--sp-md) var(--sp-md); padding: 20px; border-radius: var(--radius-lg); box-shadow: var(--shadow-sm); display: flex; gap: var(--sp-md); align-items: start; }
+        .list-card-img { width: 90px; height: 90px; border-radius: 12px; object-fit: cover; flex-shrink: 0; }
+
+        /* --- 4. Detail View --- */
+        #detail-view { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--surface); z-index: 2000; overflow-y: auto; display: none; }
+        .detail-hero-section { position: relative; height: 300px; }
+        .detail-hero-img { width: 100%; height: 100%; object-fit: cover; }
+        .detail-back-btn { position: fixed; top: 16px; left: 16px; background: rgba(255,255,255,0.9); width: 40px; height: 40px; border-radius: 50%; display: flex; justify-content: center; align-items: center; box-shadow: 0 4px 12px rgba(0,0,0,0.15); cursor: pointer; z-index: 2010; }
+
+        .detail-container { border-radius: 24px 24px 0 0; margin-top: -32px; background: var(--surface); position: relative; padding: 32px 24px 100px; min-height: 100vh; }
+        
+        h1.detail-title { font-size: 26px; font-weight: 800; color: var(--text-main); margin-bottom: 8px; line-height: 1.3; }
+        p.detail-subtitle { font-size: 15px; color: var(--text-body); margin-bottom: 24px; line-height: 1.6; }
+        h3.section-header { font-size: 18px; font-weight: 700; color: var(--text-main); margin: 40px 0 16px; display: flex; align-items: center; gap: 8px; padding-left: 12px; border-left: 4px solid var(--secondary); }
+        .body-text { font-size: 16px; line-height: 1.8; color: var(--text-body); margin-bottom: 16px; }
+
+        /* Components for Details */
+        .info-grid { display: flex; gap: 12px; margin-bottom: 32px; }
+        .info-box { flex: 1; background: #FAFAFA; border: 1px solid #EEE; border-radius: 12px; padding: 12px; text-align: center; }
+        .info-label { font-size: 12px; color: var(--text-muted); margin-bottom: 4px; display: flex; justify-content: center; gap: 4px; }
+        .info-value { font-size: 15px; font-weight: 700; color: var(--primary); }
+
+        .ing-group { margin-bottom: 16px; }
+        .ing-title { font-size: 14px; font-weight: 700; color: var(--text-main); margin-bottom: 8px; background: #eee; display: inline-block; padding: 4px 8px; border-radius: 4px; }
+        .ing-item { display: flex; align-items: center; gap: 12px; padding: 8px 0; border-bottom: 1px solid #f5f5f5; }
+        .checkbox-circle { width: 20px; height: 20px; border: 2px solid #ddd; border-radius: 50%; }
+
+        .step-row { display: flex; gap: 16px; margin-bottom: 32px; }
+        .step-idx { font-size: 14px; font-weight: 800; color: white; background: var(--secondary); width: 24px; height: 24px; border-radius: 50%; text-align: center; line-height: 24px; flex-shrink: 0; margin-top: 2px; }
+        .step-content { flex: 1; }
+        .step-tip { background: #FFF9E6; border: 1px solid #FFE0B2; padding: 12px; border-radius: 8px; margin-top: 12px; font-size: 14px; color: #8F6B00; display: flex; gap: 8px; }
+
+        /* SOP Specific Styles */
+        .sop-card { background: var(--primary-light); padding: 24px; border-radius: 16px; margin-bottom: 24px; display:flex; gap:16px; align-items:flex-start; }
+        .sop-icon { background: var(--primary); color: white; width: 48px; height: 48px; border-radius: 12px; display: flex; justify-content: center; align-items: center; flex-shrink: 0; }
+
+        .tldr-box { background: var(--primary-light); border: 1px solid rgba(0,101,43,0.1); border-radius: 12px; overflow: hidden; margin-bottom: 24px; }
+        .tldr-header { padding: 12px 16px; font-weight: 700; color: var(--primary); display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
+        .tldr-body { padding: 0 16px 16px; display: none; }
+        .tldr-body.show { display: block; }
+        .tldr-item { display: flex; gap: 8px; margin-bottom: 8px; font-size: 15px; color: var(--text-body); }
+
+        .comparison-table { width: 100%; border-collapse: separate; border-spacing: 0; border: 1px solid #eee; border-radius: 12px; overflow: hidden; margin-bottom: 20px; font-size: 14px; }
+        .comparison-table th { background: #f9f9f9; padding: 12px; font-weight: 600; text-align: center; border-bottom: 1px solid #eee; }
+        .comparison-table td { padding: 12px; text-align: center; border-bottom: 1px solid #eee; color: var(--text-body); }
+
+        .h-scroll { display: flex; gap: 12px; overflow-x: auto; padding-bottom: 8px; scrollbar-width: none; }
+        .mu-card { min-width: 100px; background: #fff; border: 1px solid #eee; border-radius: 8px; padding: 8px; text-align: center; }
+
+        .action-btn { width: 100%; background: var(--secondary); color: white; padding: 16px; border-radius: 12px; font-weight: 700; font-size: 16px; border: none; margin-top: 40px; box-shadow: 0 8px 20px rgba(255,87,0,0.25); display: flex; justify-content: center; align-items: center; gap: 8px; cursor: pointer; }
+
+        /* --- 5. Bottom Nav --- */
+        .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; height: var(--bottom-nav-height); background: rgba(255,255,255,0.95); backdrop-filter: blur(10px); border-top: 1px solid rgba(0,0,0,0.05); display: flex; justify-content: space-around; padding-top: 12px; z-index: 1000; }
+        .nav-item { display: flex; flex-direction: column; align-items: center; gap: 4px; color: #999; cursor: pointer; flex: 1; }
+        .nav-item.active { color: var(--primary); }
+        .nav-text { font-size: 10px; font-weight: 500; }
+        .nav-item.scan-btn { position: relative; top: -28px; }
+        .scan-circle { width: 56px; height: 56px; background: var(--primary); border-radius: 50%; box-shadow: var(--shadow-md); display: flex; justify-content: center; align-items: center; color: white; border: 4px solid var(--bg-body); }
+
+        .fade-in { animation: fadeIn 0.4s ease-out forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+    </style>
+</head>
+<body>
+
+    <div id="app-root"></div>
+
+    <div id="detail-view">
+        <div class="detail-back-btn" onclick="closeDetail()">
+            <span class="material-symbols-outlined">arrow_back</span>
+        </div>
+        <div class="detail-hero-section">
+            <img id="detail-img" class="detail-hero-img" src="" alt="">
+        </div>
+        <div class="detail-container">
+            <div id="detail-content"></div>
+        </div>
+    </div>
+
+    <nav class="bottom-nav">
+        <div class="nav-item active" onclick="router('home')">
+            <span class="material-symbols-outlined">home</span><span class="nav-text">首頁</span>
+        </div>
+        <div class="nav-item" onclick="router('info')">
+            <span class="material-symbols-outlined">article</span><span class="nav-text">餐飲情報</span>
+        </div>
+        <div class="nav-item scan-btn" onclick="router('scan')">
+            <div class="scan-circle"><span class="material-symbols-outlined" style="font-size: 28px;">qr_code_scanner</span></div>
+            <span class="nav-text" style="margin-top: 4px; color: var(--primary); font-weight: 700;">集點</span>
+        </div>
+        <div class="nav-item" onclick="router('recipes')">
+            <span class="material-symbols-outlined">menu_book</span><span class="nav-text">專業食譜</span>
+        </div>
+        <div class="nav-item" onclick="router('shop')">
+            <span class="material-symbols-outlined">shopping_cart</span><span class="nav-text">購買</span>
+        </div>
+    </nav>
+
+    <script>
+        // --- Data ---
+        const db = {
+            sop: {
+                id: 999,
+                title: "3步驟出餐 SOP",
+                subtitle: "解決午餐高峰期的速度焦慮，標準化流程提升翻桌率",
+                img: "https://placehold.co/800x600/6A1B9A/FFF?text=Kitchen+SOP",
+                desc: "針對繁忙廚房設計的標準作業流程 (SOP)。透過核心醬料與預製備料，將出餐時間壓縮至 3 分鐘以內，無需依賴資深廚師也能維持穩定品質。",
+                steps: [
+                    { title: "步驟 1：免調味備料 (Sauce Ready)", text: "使用康寶專業醬料（如打拋醬、麻辣醬）取代傳統 8-10 種瓶罐調味。醬料已包含基礎鹹度與香氣，無需現場秤重調配。", tip: "建議將醬料分裝至擠壓瓶，並標示刻度，工讀生也能精準操作。" },
+                    { title: "步驟 2：食材統一規格 (Pre-Prep)", text: "肉類與蔬菜依照標準規格預先切製、過油或汆燙。肉片建議預先醃製（使用雞粉與太白粉）並分袋冷藏，每袋即為一份。", tip: "蔬菜類可依照熟成時間分類，難熟的先燙至 7 分熟。" },
+                    { title: "步驟 3：大火快炒出餐 (Flash Fry)", text: "熱鍋後依序放入食材與醬料。因醬料無需等待溶化，只需大火翻炒 45-60 秒讓鑊氣包覆即可起鍋。", tip: "出餐前只需專注擺盤，無需試味，確保每一盤味道一致。" }
+                ],
+                relatedRecipes: [
+                     { name: "打拋豬", time: "10分" },
+                     { name: "回鍋肉", time: "8分" },
+                     { name: "黑椒牛", time: "5分" }
+                ]
+            },
+            recipes: [
+                { 
+                    id: 1, title: "麻辣水煮魚", subtitle: "新川菜風格，香麻辣爽，層次豐富", 
+                    category: ["all", "chef", "spicy"], 
+                    stats: { time: "15分", cost: "45元", diff: "中" }, 
+                    type: "名廚", img: "https://placehold.co/800x600/FF5700/FFF?text=Spicy+Fish",
+                    author: "江振誠主廚",
+                    desc: "透過低溫慢煮鎖住肉汁，搭配康寶麻辣醬與特製花椒油，呈現多層次香氣。適合追求精緻口感的餐廳。",
+                    ingredients: { main: ["鱸魚片 400g", "豆芽菜 200g", "青江菜 150g"], seasoning: ["康寶麻辣醬 3大匙", "康寶雞粉 1小匙", "花椒粒 1大匙"] },
+                    steps: [
+                        { title: "魚片醃製", text: "鱸魚片切薄片，用鹽、太白粉醃製10分鐘。", tip: "太白粉讓魚肉更滑嫩。" },
+                        { title: "炒醬料", text: "起油鍋，放入康寶麻辣醬炒香約1分鐘。", tip: "中小火避免燒焦。" },
+                        { title: "煮湯底", text: "加入高湯、康寶雞粉、薑片，煮滾後轉中火。", tip: "康寶雞粉可提升湯底鮮味。" }
+                    ],
+                    qa: [{ q: "如何讓魚肉更滑嫩?", a: "除了太白粉，加一點蛋白也有效果。" }],
+                    related: "康寶麻辣醬"
+                },
+                { 
+                    id: 2, title: "泰式打拋豬", subtitle: "10 分鐘快速出餐，客人超愛點", 
+                    category: ["all", "lazy", "low_cost"], 
+                    stats: { time: "10分", cost: "38元", diff: "易" }, 
+                    type: "懶人包", img: "https://placehold.co/800x600/00652B/FFF?text=Thai+Pork",
+                    author: "康寶研發團隊",
+                    desc: "使用康寶泰式打拋醬，一醬搞定複雜調味，解決後廚備料煩惱。",
+                    ingredients: { main: ["豬絞肉 150g", "九層塔 1把"], seasoning: ["康寶泰式打拋醬 2大匙", "魚露 1小匙"] },
+                    steps: [
+                        { title: "炒絞肉", text: "熱鍋爆香蒜末，加入豬絞肉炒至變色。", tip: "中大火快炒。" },
+                        { title: "加醬料", text: "加入康寶打拋醬拌炒均勻。", tip: "無需再加其他調味料！" }
+                    ],
+                    related: "康寶泰式打拋醬"
+                }
+            ],
+            info: [
+                { 
+                    id: 101, title: "韓式發酵醬應用", category: "trend", 
+                    subtitle: "為經典菜色注入獨特風味層次", img: "https://placehold.co/800x600/eee/333?text=Korean+Sauce", 
+                    meta: { time: "3分鐘", views: "1.2k", author: "江振誠" },
+                    tldr: ["韓式發酵醬可取代傳統醃料", "成本降低30%"],
+                    sections: [
+                        { title: "為什麼發酵醬正在流行?", content: "使用發酵調味品的餐廳比傳統餐廳多出 35% 的回客率。" },
+                         { title: "成本與效益分析", table: { headers: ["項目", "自製", "康寶"], rows: [["製作", "90天", "即用"], ["成本", "15元", "8元"]] } }
+                    ],
+                    related: "康寶韓式辣醬"
+                }
+            ]
+        };
+
+        // --- Logic ---
+        let currentPage = 'home', currentTab = 'all';
+
+        function router(page) {
+            currentPage = page; currentTab = 'all';
+            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+            const navMap = {'home':0, 'info':1, 'scan':2, 'recipes':3, 'shop':4};
+            if(document.querySelectorAll('.nav-item')[navMap[page]]) document.querySelectorAll('.nav-item')[navMap[page]].classList.add('active');
+            render(); window.scrollTo(0,0);
+        }
+
+        function switchTab(label, index) {
+            document.querySelectorAll('.tab-chip').forEach(c => c.classList.remove('active'));
+            document.querySelectorAll('.tab-chip')[index].classList.add('active');
+            const map = { 'home': ['all','chef','lazy','low_cost'], 'recipes': ['all','chef','lazy','low_cost'], 'info': ['all','manage','trend'] };
+            currentTab = map[currentPage][index];
+            const contentEl = document.getElementById('tab-content');
+            if(currentPage === 'home') contentEl.innerHTML = renderHomeContent(currentTab);
+            if(currentPage === 'recipes') contentEl.innerHTML = renderRecipeList(currentTab);
+            if(currentPage === 'info') contentEl.innerHTML = renderInfoList(currentTab);
+        }
+
+        function render() {
+            const root = document.getElementById('app-root');
+            let content = '';
+            if(currentPage === 'home') content = renderHeader(['為你推薦','名廚技法','懶人包','低成本']) + `<div id="tab-content">${renderHomeContent('all')}</div>`;
+            else if(currentPage === 'recipes') content = renderHeader(['全部','名廚專區','懶人包','低成本']) + `<div id="tab-content" class="container">${renderRecipeList('all')}</div>`;
+            else if(currentPage === 'info') content = renderHeader(['最新情報','經營管理','餐飲趨勢']) + `<div id="tab-content">${renderInfoList('all')}</div>`;
+            else if(currentPage === 'scan') content = renderScan();
+            else if(currentPage === 'shop') content = `<div style="display:flex;justify-content:center;align-items:center;height:80vh;color:#999;">商城載入中...</div>`;
+            root.innerHTML = content;
+        }
+
+        function renderHeader(tabs) {
+            return `<header>
+                <div class="header-top"><div class="search-bar"><span class="material-symbols-outlined">search</span><span>搜尋...</span></div><span class="material-symbols-outlined">notifications</span></div>
+                <div class="tab-bar"><div class="scrolling-wrapper">${tabs.map((t,i)=>`<div class="tab-chip ${i===0?'active':''}" onclick="switchTab('${t}',${i})">${t}</div>`).join('')}</div></div>
+            </header>`;
+        }
+
+        function renderHomeContent(filter) {
+            let list = db.recipes;
+            if(filter!=='all') list = db.recipes.filter(r => r.category.includes(filter));
+            return `<div class="fade-in">
+                ${filter==='all' ? `<div style="padding:24px 20px 0;"><h2 style="font-size:22px;font-weight:800;color:var(--primary);margin-bottom:4px;">早安，張主廚</h2><p style="color:#666;font-size:14px;">今天廚房還順利嗎？</p></div>`:''}
+                <div class="section-title"><span>${filter==='all'?'本月精選':'推薦食譜'}</span></div>
+                <div class="card-scroll-container">${list.map(r => `<div class="card recipe-card" style="min-width:220px;" onclick="openDetail('recipe',${r.id})"><div class="card-img-wrapper"><span class="card-badge">${r.type}</span><img class="card-img" src="${r.img}"></div><div class="card-content"><div class="card-title">${r.title}</div><div class="card-meta"><div class="meta-tag">${r.stats.time}</div><div class="meta-tag">${r.stats.cost}</div></div></div></div>`).join('')}</div>
+                <div style="padding:24px 20px;">
+                    <div onclick="openDetail('sop', 999)" style="background:linear-gradient(135deg,#00652B,#004d20);border-radius:16px;padding:24px;color:white;display:flex;align-items:center;gap:16px;box-shadow:var(--shadow-md);cursor:pointer;">
+                        <span class="material-symbols-outlined" style="font-size:32px;">bolt</span>
+                        <div><div style="font-weight:700;font-size:16px;">3步驟出餐 SOP</div><div style="font-size:12px;opacity:0.8;">午餐高峰救星，點擊查看</div></div>
+                    </div>
+                </div>
+            </div>`;
+        }
+
+        function renderRecipeList(filter) {
+            let list = db.recipes;
+            if(filter!=='all') list = list.filter(r => r.category.includes(filter));
+            return `<div class="fade-in grid-container" style="padding-top:24px;">${list.map(r => `<div class="card" onclick="openDetail('recipe',${r.id})"><div class="card-img-wrapper"><span class="card-badge">${r.type}</span><img class="card-img" src="${r.img}"></div><div class="card-content"><div class="card-title">${r.title}</div><div class="card-meta"><div class="meta-tag">${r.stats.time}</div></div></div></div>`).join('')}</div>`;
+        }
+
+        function renderInfoList(filter) {
+            let list = db.info;
+            if(filter!=='all') list = list.filter(i => i.category === filter);
+            return `<div class="fade-in" style="padding-top:24px;">${list.map(i => `<div class="list-card" onclick="openDetail('info',${i.id})"><div style="flex:1;"><span style="font-size:12px;color:var(--primary);font-weight:600;">#${i.category.toUpperCase()}</span><div class="card-title" style="font-size:16px; margin:4px 0;">${i.title}</div><div style="font-size:13px;color:#666;">${i.meta.views} 閱讀</div></div><img class="list-card-img" src="${i.img}"></div>`).join('')}</div>`;
+        }
+
+        function renderScan() {
+            return `<div style="height:100vh;background:#111;display:flex;flex-direction:column;align-items:center;justify-content:center;color:white;"><div style="width:240px;height:240px;border:2px solid var(--secondary);border-radius:24px;position:relative;display:flex;justify-content:center;align-items:center;"><span class="material-symbols-outlined" style="font-size:48px;opacity:0.5;">qr_code_2</span></div><div style="margin-top:24px;opacity:0.8;">將 QR Code 放入框內</div><div style="position:absolute;bottom:100px;width:90%;background:white;border-radius:16px;padding:20px;color:#333;"><div style="display:flex;justify-content:space-between;align-items:flex-end;"><span style="font-weight:700;font-size:18px;">現有點數 850</span><span style="color:var(--secondary);font-size:12px;font-weight:600;">差 150 點可兌換</span></div><div style="height:6px;background:#eee;border-radius:3px;margin-top:12px;overflow:hidden;"><div style="width:85%;height:100%;background:var(--secondary);"></div></div></div></div>`;
+        }
+
+        // --- Detail View ---
+        function openDetail(type, id) {
+            const view = document.getElementById('detail-view');
+            const img = document.getElementById('detail-img');
+            const content = document.getElementById('detail-content');
+            let html = '';
+
+            if (type === 'sop') {
+                const s = db.sop;
+                img.src = s.img;
+                html = `
+                    <h1 class="detail-title">${s.title}</h1>
+                    <p class="detail-subtitle">${s.subtitle}</p>
+                    <div style="background:#F3E5F5; color:#4A148C; padding:16px; border-radius:12px; margin-bottom:24px; font-size:14px; line-height:1.6;">${s.desc}</div>
+                    
+                    <h3 class="section-header">標準流程 (SOP)</h3>
+                    <div>${s.steps.map((st, i) => `
+                        <div class="sop-card">
+                            <div class="sop-icon"><span class="material-symbols-outlined" style="font-size:24px;">${i===0?'liquor':i===1?'grid_view':'skillet'}</span></div>
+                            <div>
+                                <div style="font-weight:700; font-size:16px; color:var(--text-main); margin-bottom:8px;">${st.title}</div>
+                                <div style="font-size:14px; color:var(--text-body); margin-bottom:8px;">${st.text}</div>
+                                <div style="font-size:13px; color:#666; background:rgba(255,255,255,0.6); padding:8px; border-radius:8px;">💡 ${st.tip}</div>
+                            </div>
+                        </div>`).join('')}
+                    </div>
+
+                    <h3 class="section-header">推薦應用菜色</h3>
+                    <div class="h-scroll" style="margin-bottom:40px;">
+                        ${s.relatedRecipes.map(r => `
+                            <div class="mu-card" style="min-width:120px;">
+                                <span class="material-symbols-outlined" style="color:var(--primary);">restaurant</span>
+                                <div style="font-size:13px; font-weight:700; margin-top:4px;">${r.name}</div>
+                                <div style="font-size:12px; color:#999;">${r.time}</div>
+                            </div>`).join('')}
+                    </div>
+
+                    <button class="action-btn">瀏覽所有懶人包食譜</button>
+                `;
+            } else if (type === 'recipe') {
+                const r = db.recipes.find(x => x.id === id);
+                img.src = r.img;
+                html = `
+                    <h1 class="detail-title">${r.title}</h1>
+                    <p class="detail-subtitle">${r.subtitle}</p>
+                    <div class="info-grid">
+                        <div class="info-box"><div class="info-label"><span class="material-symbols-outlined" style="font-size:14px">schedule</span>時間</div><div class="info-value">${r.stats.time}</div></div>
+                        <div class="info-box"><div class="info-label"><span class="material-symbols-outlined" style="font-size:14px">attach_money</span>成本</div><div class="info-value">${r.stats.cost}</div></div>
+                        <div class="info-box"><div class="info-label"><span class="material-symbols-outlined" style="font-size:14px">signal_cellular_alt</span>難度</div><div class="info-value">${r.stats.diff}</div></div>
+                    </div>
+                    <p class="body-text">${r.desc}</p>
+                    <h3 class="section-header">所需材料</h3>
+                    <div style="margin-bottom:32px;">
+                        <div class="ing-group"><div class="ing-title">主食材</div>${r.ingredients.main.map(x=>`<div class="ing-item"><div class="checkbox-circle"></div><span>${x}</span></div>`).join('')}</div>
+                        <div class="ing-group"><div class="ing-title">調味料</div>${r.ingredients.seasoning.map(x=>`<div class="ing-item"><div class="checkbox-circle"></div><span>${x}</span></div>`).join('')}</div>
+                    </div>
+                    <h3 class="section-header">烹調步驟</h3>
+                    <div>${r.steps.map((s,i) => `<div class="step-row"><div class="step-idx">${i+1}</div><div class="step-content"><div style="font-weight:700;margin-bottom:4px;">${s.title}</div><div style="color:var(--text-body);font-size:15px;">${s.text}</div>${s.tip ? `<div class="step-tip"><span class="material-symbols-outlined" style="font-size:18px;">lightbulb</span><span>${s.tip}</span></div>` : ''}</div></div>`).join('')}</div>
+                    ${r.qa ? `<h3 class="section-header">主廚 Q&A</h3><div style="background:#f5f5f5;border-radius:12px;padding:16px;">${r.qa.map(q=>`<div style="margin-bottom:12px;"><div style="font-weight:700;font-size:14px;margin-bottom:4px;">Q: ${q.q}</div><div style="font-size:14px;color:#555;">A: ${q.a}</div></div>`).join('')}</div>` : ''}
+                    <button class="action-btn"><span class="material-symbols-outlined">shopping_bag</span> 加入採購清單 (${r.related})</button>
+                `;
+            } else if (type === 'info') {
+                const i = db.info.find(x => x.id === id);
+                img.src = i.img;
+                html = `
+                    <h1 class="detail-title">${i.title}</h1>
+                    <p class="detail-subtitle">${i.subtitle}</p>
+                    <div style="display:flex;gap:16px;color:#888;font-size:13px;margin-bottom:24px;padding-bottom:16px;border-bottom:1px solid #eee;"><span><span class="material-symbols-outlined" style="vertical-align:middle;font-size:16px;">schedule</span> ${i.meta.time}</span><span><span class="material-symbols-outlined" style="vertical-align:middle;font-size:16px;">visibility</span> ${i.meta.views}</span></div>
+                    <div class="tldr-box">
+                        <div class="tldr-header" onclick="this.nextElementSibling.classList.toggle('show')"><span>⚡ 重點摘要 (TL;DR)</span><span class="material-symbols-outlined">expand_more</span></div>
+                        <div class="tldr-body show">${i.tldr.map(t=>`<div class="tldr-item"><span class="material-symbols-outlined" style="font-size:18px;color:var(--secondary);">check</span><span>${t}</span></div>`).join('')}</div>
+                    </div>
+                    ${i.sections.map(sec => `<div style="margin-bottom:32px;"><h3 class="section-header">${sec.title}</h3>${sec.content ? `<p class="body-text">${sec.content}</p>` : ''}${sec.table ? `<table class="comparison-table"><thead><tr>${sec.table.headers.map(h=>`<th>${h}</th>`).join('')}</tr></thead><tbody>${sec.table.rows.map(r=>`<tr>${r.map(c=>`<td>${c}</td>`).join('')}</tr>`).join('')}</tbody></table>` : ''}</div>`).join('')}
+                    <button class="action-btn"><span class="material-symbols-outlined">shopping_cart</span> 查看相關產品 (${i.related})</button>
+                `;
+            }
+            content.innerHTML = html;
+            view.style.display = 'block';
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeDetail() {
+            document.getElementById('detail-view').style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }
+
+        router('home');
+    </script>
+</body>
+</html>
